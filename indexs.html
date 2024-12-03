@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UZNEFTGAZ</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            height: 100%;
+        }
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #ffffff;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+        }
+        .navbar-brand {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        .menu-container {
+            cursor: pointer;
+        }
+        .hamburger div {
+            width: 25px;
+            height: 3px;
+            background-color: #000;
+            margin: 4px 0;
+            border-radius: 2px;
+        }
+        .menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 250px;
+            height: 100%;
+            background-color: #ffffff;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            padding: 20px;
+        }
+        .menu.active {
+            display: block;
+        }
+        .menu button {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 16px;
+            text-align: left;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .menu button:hover {
+            background-color: #e0e0e0;
+        }
+        .content-container {
+            margin-top: 60px;
+            padding: 20px;
+        }
+        .iframe-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        iframe {
+            width: 100%;
+            height: 250px;
+            border: none;
+            overflow:hidden;
+        }
+        .navigation-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Позиционирование кнопок поверх второго слайда */
+        #leftButton, #rightButton {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            padding: 10px;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            z-index: 10;
+        }
+
+        #leftButton {
+            left: -15px;
+            top: -400px;
+        }
+
+        #rightButton {
+            right: -15px;
+            top: -400px;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Шапка -->
+    <header class="header">
+        <div class="navbar">
+            <div class="navbar-brand">UZNEFTGAZ</div>
+            <div class="menu-container" onclick="toggleMenu()">
+                <div class="hamburger">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Меню -->
+    <div class="menu" id="menu">
+        <button onclick="loadSource(1)">Часовой анализ</button>
+        <button onclick="loadSource(2)">Переработка</button>
+        <button onclick="loadSource(3)">ОЭКС</button>
+    </div>
+
+    <!-- Основное содержимое -->
+    <div class="content-container">
+        <div id="iframeGroup" class="iframe-container">
+            <!-- Iframe-здесь будет динамический контент -->
+        </div>
+        <div class="navigation-container" id="navigationContainer">
+            <!-- Кнопки остаются поверх слайдов -->
+            <button class="btn btn-secondary" id="leftButton" onclick="prevGroup()">с</button>
+            <button class="btn btn-secondary" id="rightButton" onclick="nextGroup()">п</button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        const menu = document.getElementById('menu');
+        const iframeGroup = document.getElementById('iframeGroup');
+        const leftButton = document.getElementById('leftButton');
+        const rightButton = document.getElementById('rightButton');
+        let currentGroupIndex = 0;
+
+        const iframeSets = [
+            {
+                urls: [
+                    "https://lookerstudio.google.com/embed/reporting/150c3245-728e-484a-950b-fb74a73c9b9c/page/p_cqe8vg9fnd",
+                    "https://lookerstudio.google.com/embed/reporting/150c3245-728e-484a-950b-fb74a73c9b9c/page/iqA7D",
+                    "https://lookerstudio.google.com/embed/reporting/150c3245-728e-484a-950b-fb74a73c9b9c/page/p_bvny49sqmd",
+                    "https://lookerstudio.google.com/embed/reporting/150c3245-728e-484a-950b-fb74a73c9b9c/page/p_xcxkqhvxjd",
+                    "https://lookerstudio.google.com/embed/reporting/150c3245-728e-484a-950b-fb74a73c9b9c/page/p_9tym4mgrkd",
+                    "https://lookerstudio.google.com/embed/reporting/150c3245-728e-484a-950b-fb74a73c9b9c/page/p_7oca1c78ld",
+                    "https://lookerstudio.google.com/embed/reporting/150c3245-728e-484a-950b-fb74a73c9b9c/page/p_w6smv8z3md"
+                ]
+            },
+            {
+                urls: [
+                    "https://lookerstudio.google.com/embed/reporting/ab70d9ea-3fb1-458c-a174-65efbb09cb1e/page/gDM8D",
+                    "https://lookerstudio.google.com/embed/reporting/ab70d9ea-3fb1-458c-a174-65efbb09cb1e/page/p_m2egp76end",
+                    "https://lookerstudio.google.com/embed/reporting/ab70d9ea-3fb1-458c-a174-65efbb09cb1e/page/p_z6l6s56end",
+                    "https://lookerstudio.google.com/embed/reporting/ab70d9ea-3fb1-458c-a174-65efbb09cb1e/page/p_eei1lzncmd",
+                    "https://lookerstudio.google.com/embed/reporting/ab70d9ea-3fb1-458c-a174-65efbb09cb1e/page/p_xqmr51ncmd",
+                    "https://lookerstudio.google.com/embed/reporting/ab70d9ea-3fb1-458c-a174-65efbb09cb1e/page/p_iqxni5e3md",
+                    "https://lookerstudio.google.com/embed/reporting/ab70d9ea-3fb1-458c-a174-65efbb09cb1e/page/p_eafwo7e3md",
+                    "https://lookerstudio.google.com/embed/reporting/ab70d9ea-3fb1-458c-a174-65efbb09cb1e/page/p_wvb6meqcmd",
+                    "https://lookerstudio.google.com/embed/reporting/ab70d9ea-3fb1-458c-a174-65efbb09cb1e/page/p_ho3gaarcmd",
+                    "https://lookerstudio.google.com/embed/reporting/ab70d9ea-3fb1-458c-a174-65efbb09cb1e/page/p_1pf5m8qcmd",
+                    "https://lookerstudio.google.com/embed/reporting/ab70d9ea-3fb1-458c-a174-65efbb09cb1e/page/p_qhkg09qcmd",
+                    "https://lookerstudio.google.com/embed/reporting/ab70d9ea-3fb1-458c-a174-65efbb09cb1e/page/p_p8tx08qcmd",
+                    "https://lookerstudio.google.com/embed/reporting/ab70d9ea-3fb1-458c-a174-65efbb09cb1e/page/p_se9bw8qcmd",
+                    "https://lookerstudio.google.com/embed/reporting/ab70d9ea-3fb1-458c-a174-65efbb09cb1e/page/p_xqfk99qcmd",
+                    "https://lookerstudio.google.com/embed/reporting/ab70d9ea-3fb1-458c-a174-65efbb09cb1e/page/p_xfjyfbspmd"
+                ]
+            },
+            {
+                urls: [
+                    "https://lookerstudio.google.com/embed/reporting/12bc2c8e-8ae9-476b-ab1f-dfec3eaa627d/page/p_7hroj3c3md",
+                    "https://lookerstudio.google.com/embed/reporting/12bc2c8e-8ae9-476b-ab1f-dfec3eaa627d/page/p_z9ca5kbamd",
+                    "https://lookerstudio.google.com/embed/reporting/12bc2c8e-8ae9-476b-ab1f-dfec3eaa627d/page/0w54D",
+                    "https://lookerstudio.google.com/embed/reporting/12bc2c8e-8ae9-476b-ab1f-dfec3eaa627d/page/p_d1n89vtkkd",
+                    "https://lookerstudio.google.com/embed/reporting/12bc2c8e-8ae9-476b-ab1f-dfec3eaa627d/page/p_nos2i6bmld",
+                    "https://lookerstudio.google.com/embed/reporting/12bc2c8e-8ae9-476b-ab1f-dfec3eaa627d/page/p_6ul4w9bmld",
+                    "https://lookerstudio.google.com/embed/reporting/12bc2c8e-8ae9-476b-ab1f-dfec3eaa627d/page/p_lenk72mdmd"
+                ]
+            }
+        ];
+
+        function toggleMenu() {
+            menu.classList.toggle('active');
+        }
+
+        function loadSource(resourceIndex) {
+            const resource = iframeSets[resourceIndex - 1];
+            currentGroupIndex = 0;
+            updateIframes(resource.urls);
+            toggleMenu();
+        }
+
+        function updateIframes(urls) {
+            iframeGroup.innerHTML = '';
+            const start = currentGroupIndex * 3;
+            const end = start + 3;
+            const currentUrls = urls.slice(start, end);
+
+            currentUrls.forEach(url => {
+                const iframe = document.createElement('iframe');
+                iframe.src = url;
+                iframe.loading = 'lazy';
+                iframeGroup.appendChild(iframe);
+            });
+
+            leftButton.style.display = currentGroupIndex > 0 ? 'block' : 'none';
+            rightButton.style.display = end < urls.length ? 'block' : 'none';
+        }
+
+        function nextGroup() {
+            const resource = iframeSets.find(r => r.urls.includes(iframeGroup.firstChild.src));
+            if ((currentGroupIndex + 1) * 3 < resource.urls.length) {
+                currentGroupIndex++;
+                updateIframes(resource.urls);
+            }
+        }
+
+        function prevGroup() {
+            if (currentGroupIndex > 0) {
+                currentGroupIndex--;
+                const resource = iframeSets.find(r => r.urls.includes(iframeGroup.firstChild.src));
+                updateIframes(resource.urls);
+            }
+        }
+    </script>
+</body>
+</html>
